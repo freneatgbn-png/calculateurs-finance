@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Calculateurs gratuits : crédit immobilier, capacité d'emprunt, salaire brut/net, épargne, frais de notaire.">
+<title>Calculateurs finance gratuits – crédit, salaire, épargne, notaire</title>
+<style>
+:root{--bg:#f6f1e7;--ink:#22252b;--mut:#65605a;--acc:#b4441e;--card:#fffdf8;--line:#ddd3c1}
+@media (prefers-color-scheme:dark){:root{--bg:#1a1714;--ink:#f1ebe0;--mut:#a89f92;--acc:#f08a5d;--card:#252119;--line:#3a3429}}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:17px/1.55 Georgia,"Times New Roman",serif;padding:max(20px,env(safe-area-inset-top)) 16px max(20px,env(safe-area-inset-bottom))}
+main{max-width:600px;margin:0 auto}
+h1{font-size:2rem;line-height:1.15;margin:8px 0 6px;letter-spacing:-.02em}
+.sub{color:var(--mut);margin:0 0 16px}
+nav{display:flex;gap:8px;overflow-x:auto;padding-bottom:10px;margin-bottom:12px}
+nav button{font:inherit;white-space:nowrap;background:var(--card);color:var(--ink);border:1.5px solid var(--line);border-radius:999px;padding:8px 14px;cursor:pointer}
+nav button[aria-current=true]{background:var(--acc);border-color:var(--acc);color:#fff}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
+label{display:block;font-size:.9rem;color:var(--mut);margin:0 0 4px}
+input,select{font:inherit;color:var(--ink);background:var(--bg);border:1.5px solid var(--line);border-radius:10px;padding:11px;width:100%}
+.f{margin-bottom:12px}
+:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+.res{margin-top:6px;padding-top:14px;border-top:1px solid var(--line)}
+.big{font-size:2.2rem;font-weight:700;color:var(--acc);line-height:1.1}
+.lab{color:var(--mut)}
+table{width:100%;border-collapse:collapse;font-size:.95rem;margin-top:8px}
+td{padding:6px 0;border-bottom:1px solid var(--line)}
+td:last-child{text-align:right;font-weight:600}
+.cta{display:block;margin-top:18px;padding:16px;border:2px solid var(--acc);border-radius:14px;text-decoration:none;color:var(--ink);background:var(--card)}
+.cta b{color:var(--acc)}
+.cta small{display:block;color:var(--mut);margin-top:4px}
+.note{color:var(--mut);font-size:.9rem;margin-top:14px}
+footer{color:var(--mut);font-size:.8rem;margin-top:28px}
+</style>
+</head>
+<body>
+<main>
+<h1>Calculateurs finance</h1>
+<p class="sub">Des simulateurs gratuits pour tes projets d'achat, de salaire et d'épargne.</p>
+<nav id="nav" aria-label="Catégories"></nav>
+<section class="card" aria-labelledby="t">
+  <h2 id="t" style="margin:0 0 12px;font-size:1.25rem"></h2>
+  <div id="form"></div>
+  <div class="res" aria-live="polite">
+    <div class="big" id="big">—</div>
+    <div class="lab" id="bl"></div>
+    <table id="rows"></table>
+  </div>
+</section>
+<a class="cta" id="aff" href="#" rel="sponsored noopener" target="_blank"><b id="ct"></b><small id="cs">Lien partenaire.</small></a>
+<p class="note" id="note"></p>
+<footer>Simulations indicatives, sans valeur contractuelle. Ce site peut contenir des liens partenaires : si tu passes par eux, il peut être rémunéré sans frais supplémentaires pour toi.</footer>
+</main>
+<script>
+// ===== À PERSONNALISER : remplace chaque '#' par ton lien d'affiliation =====
+const AFF={credit:'#',capacite:'#',salaire:'#',epargne:'#',notaire:'#'};
+// ===========================================================================
+const $=id=>document.getElementById(id);
+const eur=(v,d=0)=>v.toLocaleString('fr-FR',{style:'currency',currency:'EUR',maximumFractionDigits:d});
+const pmt=(C,t,n)=>t===0?C/n:C*t/(1-Math.pow(1+t,-n));
+
+const TOOLS=[
+{id:'credit',nom:'Crédit immobilier',
+ f:[['cap','Montant emprunté (€)',250000],['dur','Durée (années)',20],['tx','Taux du crédit (%)',3.5],['ass','Assurance (% par an)',0.3]],
+ run:v=>{const n=v.dur*12,b=pmt(v.cap,v.tx/1200,n),ia=v.cap*v.ass/100/12,i=b*n-v.cap,a=ia*n;
+  return {big:eur(b+ia,2),bl:'par mois, assurance incluse',rows:[['Coût des intérêts',eur(i)],['Coût de l\'assurance',eur(a)],['Coût total du crédit',eur(i+a)],['Total remboursé',eur(v.cap+i+a)]]}},
+ cta:'Et si tu obtenais un meilleur taux ?',cs:'Compare les offres de plusieurs banques gratuitement.',
+ note:'Mensualité à taux fixe, assurance calculée sur le capital initial.'},
+{id:'capacite',nom:'Capacité d\'emprunt',
+ f:[['rev','Revenus nets mensuels du foyer (€)',3500],['ch','Charges de crédits en cours (€/mois)',0],['dur','Durée (années)',20],['tx','Taux du crédit (%)',3.5]],
+ run:v=>{const M=Math.max(v.rev*0.35-v.ch,0),n=v.dur*12,t=v.tx/1200,cap=M/pmt(1,t,n);
+  return {big:eur(cap),bl:'capacité d\'emprunt estimée',rows:[['Mensualité maximale (35 %)',eur(M)],['Durée',v.dur+' ans'],['Taux',v.tx+' %']]}},
+ cta:'Fais valider ton projet par un courtier',cs:'Un courtier compare les banques pour toi, sans engagement.',
+ note:'Basé sur le taux d\'endettement maximal de 35 % (assurance incluse). Les banques étudient aussi ton apport et ta stabilité.'},
+{id:'salaire',nom:'Salaire brut / net',
+ f:[['brut','Salaire brut mensuel (€)',3000],['st','Statut',['Non-cadre',0.22],['Cadre',0.25],['Fonction publique',0.15]]],
+ run:v=>{const net=v.brut*(1-v.st);
+  return {big:eur(net),bl:'net avant impôt, par mois',rows:[['Net annuel (12 mois)',eur(net*12)],['Cotisations estimées',eur(v.brut-net)],['Brut annuel',eur(v.brut*12)]]}},
+ cta:'Fais fructifier ton salaire',cs:'Compare les livrets et placements adaptés à ton budget.',
+ note:'Estimation moyenne (environ 22 % non-cadre, 25 % cadre, 15 % fonction publique). Ton bulletin de paie fait foi. Le prélèvement à la source n\'est pas déduit.'},
+{id:'epargne',nom:'Épargne',
+ f:[['ini','Capital de départ (€)',1000],['vm','Versement mensuel (€)',200],['r','Rendement annuel (%)',3],['dur','Durée (années)',10]],
+ run:v=>{const n=v.dur*12,t=v.r/1200;let k=v.ini;for(let i=0;i<n;i++)k=k*(1+t)+v.vm;const ver=v.ini+v.vm*n;
+  return {big:eur(k),bl:'capital final estimé',rows:[['Total versé',eur(ver)],['Intérêts gagnés',eur(k-ver)]]}},
+ cta:'Où placer ton épargne ?',cs:'Découvre des placements à comparer selon ton profil.',
+ note:'Intérêts composés capitalisés chaque mois, avant fiscalité. Le rendement n\'est pas garanti.'},
+{id:'notaire',nom:'Frais de notaire',
+ f:[['prix','Prix du bien (€)',250000],['ty','Type de bien',['Ancien',0.075],['Neuf',0.025]]],
+ run:v=>{const fr=v.prix*v.ty;
+  return {big:eur(fr),bl:'frais de notaire estimés',rows:[['Prix du bien',eur(v.prix)],['Coût total de l\'achat',eur(v.prix+fr)]]}},
+ cta:'Finance ton achat au meilleur prix',cs:'Simule ton prêt et compare les offres.',
+ note:'Estimation : environ 7,5 % dans l\'ancien et 2,5 % dans le neuf. Le montant exact dépend du département.'}
+];
+
+let cur=TOOLS[0];
+function build(tool){
+  cur=tool;
+  $('t').textContent=tool.nom;
+  $('form').innerHTML='';
+  tool.f.forEach(([id,lab,d,...opts])=>{
+    const w=document.createElement('div');w.className='f';
+    const l=document.createElement('label');l.htmlFor='i_'+id;l.textContent=lab;w.appendChild(l);
+    let el;
+    if(Array.isArray(d)){
+      el=document.createElement('select');
+      [d,...opts].forEach(o=>{const op=document.createElement('option');op.value=o[1];op.textContent=o[0];el.appendChild(op)});
+    }else{
+      el=document.createElement('input');el.type='number';el.inputMode='decimal';el.step='any';el.min='0';el.value=d;
+    }
+    el.id='i_'+id;el.addEventListener('input',calc);w.appendChild(el);$('form').appendChild(w);
+  });
+  $('ct').textContent=tool.cta;$('cs').textContent=tool.cs+' Lien partenaire.';
+  $('aff').href=AFF[tool.id];$('note').textContent=tool.note;
+  document.title=tool.nom+' – calculateur gratuit';
+  [...$('nav').children].forEach(b=>b.setAttribute('aria-current',b.dataset.id===tool.id));
+  calc();
+}
+function calc(){
+  const v={};cur.f.forEach(([id])=>v[id]=parseFloat($('i_'+id).value)||0);
+  const r=cur.run(v);
+  $('big').textContent=r.big;$('bl').textContent=r.bl;
+  $('rows').innerHTML=r.rows.map(x=>'<tr><td>'+x[0]+'</td><td>'+x[1]+'</td></tr>').join('');
+}
+TOOLS.forEach(t=>{
+  const b=document.createElement('button');b.textContent=t.nom;b.dataset.id=t.id;
+  b.onclick=()=>{location.hash=t.id;build(t)};$('nav').appendChild(b);
+});
+build(TOOLS.find(t=>t.id===location.hash.slice(1))||TOOLS[0]);
+</script>
+</body>
+</html>
